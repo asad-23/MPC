@@ -273,14 +273,21 @@
       <form id="form-match" onsubmit="app.handleSaveMatch(event)">
         <input type="hidden" id="match-edit-id" value="">
 
-        <!-- Match Picker Row -->
+        <!-- Match Picker Row with Custom Player Selectors (No Ugly OS Dialogs) -->
         <div class="match-picker-row">
           <!-- Player 1 Side -->
           <div class="match-side-input">
             <label class="form-label">Player 1</label>
-            <select id="match-player1" class="form-select" required>
-              <option value="">Select Player</option>
-            </select>
+            <div class="custom-player-select" id="match-player1-btn" onclick="app.openPlayerPicker(1)">
+              <div class="player-avatar-small" id="match-p1-avatar" style="background-color: #3b82f6;">?</div>
+              <div class="select-player-text-wrap">
+                <span class="select-player-name" id="match-p1-name">Select Player</span>
+                <span class="select-player-tag" id="match-p1-tag">Tap to choose</span>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+            <input type="hidden" id="match-player1" value="" required>
+
             <div class="score-stepper">
               <button type="button" class="step-btn" onclick="app.adjustScore('match-score1', -1)">-</button>
               <input type="number" id="match-score1" class="score-val-input" value="0" min="0" max="99" required>
@@ -293,9 +300,16 @@
           <!-- Player 2 Side -->
           <div class="match-side-input">
             <label class="form-label">Player 2</label>
-            <select id="match-player2" class="form-select" required>
-              <option value="">Select Player</option>
-            </select>
+            <div class="custom-player-select" id="match-player2-btn" onclick="app.openPlayerPicker(2)">
+              <div class="player-avatar-small" id="match-p2-avatar" style="background-color: #00e676;">?</div>
+              <div class="select-player-text-wrap">
+                <span class="select-player-name" id="match-p2-name">Select Player</span>
+                <span class="select-player-tag" id="match-p2-tag">Tap to choose</span>
+              </div>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            </div>
+            <input type="hidden" id="match-player2" value="" required>
+
             <div class="score-stepper">
               <button type="button" class="step-btn" onclick="app.adjustScore('match-score2', -1)">-</button>
               <input type="number" id="match-score2" class="score-val-input" value="0" min="0" max="99" required>
@@ -344,28 +358,44 @@
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="player-color">Badge Color Accent</label>
-          <select id="player-color" class="form-select">
-            <option value="#3b82f6">Electric Blue</option>
-            <option value="#00e676">Stadium Green</option>
-            <option value="#00e5ff">Neon Cyan</option>
-            <option value="#ec4899">Hot Pink</option>
-            <option value="#f59e0b">Amber Gold</option>
-            <option value="#8b5cf6">Vibrant Purple</option>
-            <option value="#ef4444">Crimson Red</option>
-          </select>
+          <label class="form-label">Badge Color Accent</label>
+          <div class="color-swatch-grid" id="color-swatch-picker">
+            <!-- Dynamically populated or rendered with circular previews -->
+          </div>
+          <input type="hidden" id="player-color" value="#00e5ff">
         </div>
 
         <div class="form-group">
-          <label class="form-label" for="player-status">Player Competition Status</label>
-          <select id="player-status" class="form-select">
-            <option value="active">Active (Available for matches)</option>
-            <option value="disabled">Disabled / Inactive (Paused from matches)</option>
-          </select>
+          <label class="form-label">Competition Status</label>
+          <div class="segmented-control">
+            <button type="button" class="segmented-btn active-opt" id="btn-status-active" onclick="app.setPlayerStatus('active')">Active</button>
+            <button type="button" class="segmented-btn" id="btn-status-disabled" onclick="app.setPlayerStatus('disabled')">Disabled</button>
+          </div>
+          <input type="hidden" id="player-status" value="active">
         </div>
 
         <button type="submit" class="btn-primary" id="btn-save-player">Save Player</button>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: CUSTOM ESPORTS PLAYER PICKER (NO NATIVE OS POPUP) -->
+  <div id="modal-player-picker" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 class="modal-title" id="player-picker-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+          </svg>
+          Select Player
+        </h3>
+        <button class="close-modal-btn" onclick="app.closePlayerPicker()">&times;</button>
+      </div>
+      <p style="font-size:12px; color:var(--text-muted); margin-bottom: 12px;">Choose a registered competitor for this match side:</p>
+      <div class="player-picker-list" id="player-picker-items">
+        <!-- Dynamically rendered player choices -->
+      </div>
     </div>
   </div>
 

@@ -238,17 +238,37 @@ class MPCLeagueApp {
 
       const initial = entry.player.name ? entry.player.name.charAt(0).toUpperCase() : '?';
       const gdSign = entry.gd > 0 ? `+${entry.gd}` : entry.gd;
-      const isFirst = rank === 1;
+
+      let crestHtml = '';
+      if (rank === 1) {
+        crestHtml = `
+          <div class="podium-crown" title="1st Place Champion">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5m14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/>
+            </svg>
+          </div>
+        `;
+      } else if (rank === 2) {
+        crestHtml = `
+          <div class="podium-silver-crest" title="2nd Place Runner-Up">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2l2.4 4.8 5.3.8-3.8 3.7.9 5.3L12 14.1l-4.8 2.5.9-5.3-3.8-3.7 5.3-.8L12 2z"/>
+            </svg>
+          </div>
+        `;
+      } else if (rank === 3) {
+        crestHtml = `
+          <div class="podium-bronze-crest" title="3rd Place Podium">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"/>
+            </svg>
+          </div>
+        `;
+      }
 
       return `
         <div class="podium-spot ${spotClass}">
-          ${isFirst ? `
-            <div class="podium-crown">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5m14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/>
-              </svg>
-            </div>
-          ` : ''}
+          ${crestHtml}
           <div class="podium-avatar-wrapper">
             <div class="podium-avatar" style="background-color: ${entry.player.color || '#3b82f6'};">
               ${initial}
@@ -690,7 +710,7 @@ class MPCLeagueApp {
     }
   }
 
-  // --- CRUD: Match Operations with Permanent Match Count ---
+  // --- CRUD: Match Operations with Permanent Match Count & Custom Picker ---
   openMatchModal(matchToEdit = null) {
     const activePlayers = this.players.filter(p => !p.disabled);
     if (activePlayers.length < 2) {
@@ -705,20 +725,16 @@ class MPCLeagueApp {
     const modal = document.getElementById('modal-match');
     const title = document.getElementById('match-modal-title');
     const editIdInput = document.getElementById('match-edit-id');
-    const p1Select = document.getElementById('match-player1');
-    const p2Select = document.getElementById('match-player2');
     const s1Input = document.getElementById('match-score1');
     const s2Input = document.getElementById('match-score2');
     const permMatchNum = document.getElementById('modal-perm-match-num');
     const deleteBtn = document.getElementById('btn-delete-match');
 
-    this.populatePlayerDropdowns();
-
     if (matchToEdit) {
       title.innerHTML = 'Edit PES Match';
       editIdInput.value = matchToEdit.id;
-      p1Select.value = matchToEdit.player1Id;
-      p2Select.value = matchToEdit.player2Id;
+      this.setMatchPlayer(1, matchToEdit.player1Id);
+      this.setMatchPlayer(2, matchToEdit.player2Id);
       s1Input.value = matchToEdit.score1;
       s2Input.value = matchToEdit.score2;
       if (permMatchNum) {
@@ -728,8 +744,8 @@ class MPCLeagueApp {
     } else {
       title.innerHTML = 'Record PES Match';
       editIdInput.value = '';
-      p1Select.value = activePlayers[0] ? activePlayers[0].id : '';
-      p2Select.value = activePlayers[1] ? activePlayers[1].id : '';
+      this.setMatchPlayer(1, activePlayers[0] ? activePlayers[0].id : '');
+      this.setMatchPlayer(2, activePlayers[1] ? activePlayers[1].id : '');
       s1Input.value = '0';
       s2Input.value = '0';
       const nextMatchNum = this.getNextMatchNumber();
@@ -740,6 +756,96 @@ class MPCLeagueApp {
     }
 
     modal.classList.add('open');
+  }
+
+  setMatchPlayer(side, playerId) {
+    const input = document.getElementById(`match-player${side}`);
+    const nameEl = document.getElementById(`match-p${side}-name`);
+    const tagEl = document.getElementById(`match-p${side}-tag`);
+    const avatarEl = document.getElementById(`match-p${side}-avatar`);
+
+    if (input) input.value = playerId;
+
+    const player = this.getPlayerById(playerId);
+    if (player) {
+      if (nameEl) nameEl.textContent = player.name;
+      if (tagEl) tagEl.textContent = player.tag || 'Active Player';
+      if (avatarEl) {
+        avatarEl.textContent = player.name.charAt(0).toUpperCase();
+        avatarEl.style.backgroundColor = player.color || '#3b82f6';
+      }
+    } else {
+      if (nameEl) nameEl.textContent = 'Select Player';
+      if (tagEl) tagEl.textContent = 'Tap to choose';
+      if (avatarEl) {
+        avatarEl.textContent = '?';
+        avatarEl.style.backgroundColor = '#64748b';
+      }
+    }
+  }
+
+  openPlayerPicker(side) {
+    this._currentPickerSide = side;
+    const modal = document.getElementById('modal-player-picker');
+    const titleEl = document.getElementById('player-picker-title');
+    const container = document.getElementById('player-picker-items');
+
+    if (titleEl) titleEl.textContent = `Select Player ${side}`;
+
+    const currentSelectedId = document.getElementById(`match-player${side}`).value;
+    const oppositeSideId = document.getElementById(`match-player${side === 1 ? 2 : 1}`).value;
+
+    const activePlayers = this.players.filter(p => !p.disabled);
+
+    if (container) {
+      container.innerHTML = '';
+
+      activePlayers.forEach(p => {
+        const isSelected = p.id === currentSelectedId;
+        const isOpponent = p.id === oppositeSideId;
+        const initial = p.name.charAt(0).toUpperCase();
+
+        const row = document.createElement('div');
+        row.className = `player-picker-row ${isSelected ? 'is-active-choice' : ''}`;
+        row.onclick = () => {
+          this.setMatchPlayer(side, p.id);
+          this.closePlayerPicker();
+        };
+
+        row.innerHTML = `
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="player-avatar-small" style="background-color: ${p.color || '#3b82f6'};">
+              ${initial}
+            </div>
+            <div>
+              <div style="font-size:14px; font-weight:700; color:#fff;">
+                ${this.escapeHtml(p.name)}
+                ${isOpponent ? '<span style="font-size:10px; color:var(--accent-yellow); margin-left:6px;">(Opponent)</span>' : ''}
+              </div>
+              <div style="font-size:11px; color:var(--text-muted);">${this.escapeHtml(p.tag || 'PES Competitor')}</div>
+            </div>
+          </div>
+          <div>
+            ${isSelected ? `
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            ` : `
+              <div style="width:16px; height:16px; border-radius:50%; border:1px solid var(--border-color);"></div>
+            `}
+          </div>
+        `;
+
+        container.appendChild(row);
+      });
+    }
+
+    if (modal) modal.classList.add('open');
+  }
+
+  closePlayerPicker() {
+    const modal = document.getElementById('modal-player-picker');
+    if (modal) modal.classList.remove('open');
   }
 
   getNextMatchNumber() {
@@ -846,36 +952,87 @@ class MPCLeagueApp {
     input.value = val;
   }
 
-  // --- CRUD: Player Operations with Duplicate Name Check & Cool Popup ---
+  // --- CRUD: Player Operations with Duplicate Name Check, Swatches & Cool Popup ---
   openPlayerModal(playerToEdit = null) {
     const modal = document.getElementById('modal-player');
     const title = document.getElementById('player-modal-title');
     const editIdInput = document.getElementById('player-edit-id');
     const nameInput = document.getElementById('player-name');
     const tagInput = document.getElementById('player-tag');
-    const colorSelect = document.getElementById('player-color');
-    const statusSelect = document.getElementById('player-status');
+
+    let selectedColor = '#00e5ff';
+    let selectedStatus = 'active';
 
     if (playerToEdit) {
       title.innerHTML = 'Edit Player Details';
       editIdInput.value = playerToEdit.id;
       nameInput.value = playerToEdit.name;
       tagInput.value = playerToEdit.tag || '';
-      colorSelect.value = playerToEdit.color || '#3b82f6';
-      statusSelect.value = playerToEdit.disabled ? 'disabled' : 'active';
+      selectedColor = playerToEdit.color || '#3b82f6';
+      selectedStatus = playerToEdit.disabled ? 'disabled' : 'active';
     } else {
       title.innerHTML = 'Add PES Competitor';
       editIdInput.value = '';
       nameInput.value = '';
       tagInput.value = '';
-      statusSelect.value = 'active';
-      const options = colorSelect.options;
-      const randIdx = Math.floor(Math.random() * options.length);
-      colorSelect.selectedIndex = randIdx;
+      const presets = ['#00e5ff', '#00e676', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444'];
+      selectedColor = presets[Math.floor(Math.random() * presets.length)];
+      selectedStatus = 'active';
     }
+
+    this.selectColor(selectedColor);
+    this.setPlayerStatus(selectedStatus);
 
     modal.classList.add('open');
     setTimeout(() => nameInput.focus(), 100);
+  }
+
+  selectColor(hex) {
+    const input = document.getElementById('player-color');
+    if (input) input.value = hex;
+
+    const container = document.getElementById('color-swatch-picker');
+    if (!container) return;
+
+    const COLOR_PRESETS = [
+      { hex: '#00e5ff', name: 'Neon Cyan' },
+      { hex: '#00e676', name: 'Stadium Green' },
+      { hex: '#3b82f6', name: 'Electric Blue' },
+      { hex: '#f59e0b', name: 'Amber Gold' },
+      { hex: '#ec4899', name: 'Hot Pink' },
+      { hex: '#8b5cf6', name: 'Vibrant Purple' },
+      { hex: '#ef4444', name: 'Crimson Red' },
+      { hex: '#14b8a6', name: 'Teal Striker' }
+    ];
+
+    container.innerHTML = '';
+    COLOR_PRESETS.forEach(c => {
+      const isSelected = c.hex.toLowerCase() === hex.toLowerCase();
+      const item = document.createElement('div');
+      item.className = `color-swatch-item ${isSelected ? 'selected' : ''}`;
+      item.onclick = () => this.selectColor(c.hex);
+      item.innerHTML = `
+        <span class="color-dot-circle" style="background-color: ${c.hex};"></span>
+        <span>${c.name}</span>
+      `;
+      container.appendChild(item);
+    });
+  }
+
+  setPlayerStatus(status) {
+    const input = document.getElementById('player-status');
+    const activeBtn = document.getElementById('btn-status-active');
+    const disabledBtn = document.getElementById('btn-status-disabled');
+
+    if (input) input.value = status;
+
+    if (status === 'disabled') {
+      if (activeBtn) activeBtn.className = 'segmented-btn';
+      if (disabledBtn) disabledBtn.className = 'segmented-btn disabled-opt';
+    } else {
+      if (activeBtn) activeBtn.className = 'segmented-btn active-opt';
+      if (disabledBtn) disabledBtn.className = 'segmented-btn';
+    }
   }
 
   handleSavePlayer(event) {
