@@ -1,0 +1,22 @@
+# Node dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Android build outputs & caches
+android/.gradle/
+android/build/
+android/app/build/
+android/captures/
+.gradle/
+build/
+*.apk
+*.aab
+
+# Local IDE & environment files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

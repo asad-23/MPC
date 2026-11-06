@@ -1,0 +1,16 @@
+{
+  "name": "MooN PES Competition (MPC)",
+  "short_name": "MPC",
+  "description": "MPC (MooN PES Competition) - Mobile eFootball & PES Player League Tracker",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0a0e17",
+  "theme_color": "#0a0e17",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

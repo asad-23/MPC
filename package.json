@@ -1,0 +1,19 @@
+{
+  "name": "pes-league-tracker",
+  "version": "1.0.0",
+  "description": "A mobile-first competition tracker designed specifically for **PES / eFootball** player tournaments. Instead of team clubs, it tracks individual persons/players, provides a live Top 3 Podium leaderboard, full CRUD capabilities, strict duplicate name prevention with custom popup alerts, player activation/disabling, permanent match order numbering, and automatic football league standings sorting with 100% persistent storage (`localStorage`).",
+  "main": "app.js",
+  "scripts": {
+    "build": "mkdir -p www && cp index.html styles.css app.js manifest.json icon.svg www/",
+    "sync": "npm run build && npx cap sync android",
+    "open": "npx cap open android"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@capacitor/android": "^8.6.0",
+    "@capacitor/cli": "^8.6.0",
+    "@capacitor/core": "^8.6.0"
+  }
+}

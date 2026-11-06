@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0e17"/>
+      <stop offset="100%" stop-color="#141c2e"/>
+    </linearGradient>
+    <linearGradient id="neon" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00e5ff"/>
+      <stop offset="100%" stop-color="#00e676"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bg)"/>
+  <circle cx="256" cy="256" r="180" stroke="url(#neon)" stroke-width="20" fill="none"/>
+  <!-- Soccer Ball / Controller Icon -->
+  <polygon points="256,150 310,195 290,260 222,260 202,195" fill="url(#neon)"/>
+  <line x1="256" y1="150" x2="256" y2="86" stroke="url(#neon)" stroke-width="14" stroke-linecap="round"/>
+  <line x1="310" y1="195" x2="370" y2="165" stroke="url(#neon)" stroke-width="14" stroke-linecap="round"/>
+  <line x1="290" y1="260" x2="335" y2="320" stroke="url(#neon)" stroke-width="14" stroke-linecap="round"/>
+  <line x1="222" y1="260" x2="177" y2="320" stroke="url(#neon)" stroke-width="14" stroke-linecap="round"/>
+  <line x1="202" y1="195" x2="142" y2="165" stroke="url(#neon)" stroke-width="14" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>MPC - MooN PES Competition</title>
+  <meta name="theme-color" content="#0a0e17">
+  <meta name="description" content="MPC (MooN PES Competition) - Player League Tracker with live podium, standings and match management.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+  <!-- Main Mobile App Shell -->
+  <div class="app-container">
+
+    <!-- Sticky Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <div class="brand-badge">MPC</div>
+        <div class="header-title-box">
+          <h1>MooN PES Competition</h1>
+          <p><span class="live-dot"></span> <span id="header-match-count">0 Matches Recorded</span></p>
+        </div>
+      </div>
+    </header>
+
+    <!-- Quick Action Shortcut Buttons -->
+    <div class="quick-action-strip">
+      <button id="quick-log-match-btn" class="action-card-btn match-btn">
+        <div class="btn-icon-circle green">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </div>
+        <div>
+          <span class="btn-text-title">Record Match</span>
+          <span class="btn-text-sub">Log PES score</span>
+        </div>
+      </button>
+
+      <button id="quick-add-player-btn" class="action-card-btn player-btn">
+        <div class="btn-icon-circle cyan">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="8.5" cy="7" r="4"></circle>
+            <line x1="20" y1="8" x2="20" y2="14"></line>
+            <line x1="23" y1="11" x2="17" y2="11"></line>
+          </svg>
+        </div>
+        <div>
+          <span class="btn-text-title">New Player</span>
+          <span class="btn-text-sub">Add competitor</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Main Views Container -->
+    <main class="main-view">
+
+      <!-- TAB 1: STANDINGS TABLE -->
+      <section id="tab-standings" class="tab-pane active">
+        
+        <!-- Live Dynamic Top 3 Podium Leaderboard -->
+        <div class="podium-container" id="podium-leaderboard">
+          <!-- Dynamically populated Top 3 Podium -->
+        </div>
+
+        <div class="section-header">
+          <h2 class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+              <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+              <path d="M4 22h16"></path>
+              <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+              <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+              <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+            </svg>
+            League Standings
+          </h2>
+          <span class="badge-count" id="standings-player-count">0 Players</span>
+        </div>
+
+        <div class="standings-card">
+          <div class="table-responsive-wrapper">
+            <table class="league-table" id="league-table">
+              <thead>
+                <tr>
+                  <th class="col-rank">#</th>
+                  <th class="col-player">Player</th>
+                  <th title="Played">P</th>
+                  <th title="Won">W</th>
+                  <th title="Drawn">D</th>
+                  <th title="Lost">L</th>
+                  <th title="Goals For">GF</th>
+                  <th title="Goals Against">GA</th>
+                  <th title="Goal Difference" class="col-gd">GD</th>
+                  <th title="Points" class="col-pts">PTS</th>
+                  <th title="Last 5 Matches Form">Form</th>
+                </tr>
+              </thead>
+              <tbody id="standings-tbody">
+                <!-- Dynamically populated rows -->
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer-note">
+            <span>Ranking: Pts &gt; GD &gt; GF &gt; Head-to-Head</span>
+            <span>Win: 3pts • Draw: 1pt</span>
+          </div>
+        </div>
+
+        <div id="standings-empty-state" class="empty-state" style="display: none;">
+          <div class="empty-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+            </svg>
+          </div>
+          <h3>No Players Added Yet</h3>
+          <p>Add at least two players to generate the league standings table and record PES matches.</p>
+          <button class="btn-secondary" onclick="app.openPlayerModal()">Add First Player</button>
+        </div>
+      </section>
+
+      <!-- TAB 2: MATCHES -->
+      <section id="tab-matches" class="tab-pane">
+        <div class="section-header">
+          <h2 class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="12 2 15 8.5 22 9.5 17 14.5 18.5 21.5 12 18 5.5 21.5 7 14.5 2 9.5 9 8.5 12 2"></polygon>
+            </svg>
+            Match Results
+          </h2>
+          <span class="badge-count" id="matches-list-count">0</span>
+        </div>
+
+        <div class="matches-list" id="matches-list-container">
+          <!-- Dynamically populated match cards -->
+        </div>
+
+        <div id="matches-empty-state" class="empty-state" style="display: none;">
+          <div class="empty-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h3>No Matches Recorded</h3>
+          <p>Play a PES match between any two players and log the score to start the competition.</p>
+          <button class="btn-secondary" onclick="app.openMatchModal()">Record Match</button>
+        </div>
+      </section>
+
+      <!-- TAB 3: PLAYERS -->
+      <section id="tab-players" class="tab-pane">
+        <div class="section-header">
+          <h2 class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="8.5" cy="7" r="4"></circle>
+              <polyline points="17 11 19 13 23 9"></polyline>
+            </svg>
+            Players &amp; Profiles
+          </h2>
+          <button class="btn-secondary" onclick="app.openPlayerModal()">+ Add</button>
+        </div>
+
+        <div class="players-grid" id="players-list-container">
+          <!-- Dynamically populated player cards -->
+        </div>
+
+        <!-- Reset Tournament Data Section -->
+        <div id="players-reset-section" style="margin-top: 24px; padding: 18px 12px 10px; border-top: 1px dashed var(--border-color); text-align: center;">
+          <button type="button" class="btn-danger" style="display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; max-width: 320px; padding: 12px 18px; margin: 0 auto; border-radius: var(--radius-sm);" onclick="app.resetAllData()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              <line x1="10" y1="11" x2="10" y2="17"></line>
+              <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>
+            Reset All League Data
+          </button>
+          <p style="font-size: 11px; color: var(--text-dim); margin-top: 8px;">Clears all registered players, match scores, and table standings.</p>
+        </div>
+      </section>
+
+      <!-- TAB 4: STATS & INSIGHTS -->
+      <section id="tab-stats" class="tab-pane">
+        <div class="section-header">
+          <h2 class="section-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+            Tournament Statistics
+          </h2>
+        </div>
+
+        <div class="stats-container" id="stats-container">
+          <!-- Dynamically filled stats -->
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Bottom Mobile Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-tab-btn active" data-tab="tab-standings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
+          <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
+          <path d="M4 22h16"></path>
+          <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
+          <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
+          <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
+        </svg>
+        <span>Table</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tab-matches">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="m4.93 4.93 4.24 4.24"></path>
+          <path d="m14.83 9.17 4.24-4.24"></path>
+          <path d="m14.83 14.83 4.24 4.24"></path>
+          <path d="m9.17 14.83-4.24 4.24"></path>
+          <circle cx="12" cy="12" r="4"></circle>
+        </svg>
+        <span>Matches</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tab-players">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="8.5" cy="7" r="4"></circle>
+          <line x1="20" y1="8" x2="20" y2="14"></line>
+          <line x1="23" y1="11" x2="17" y2="11"></line>
+        </svg>
+        <span>Players</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="tab-stats">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10"></line>
+          <line x1="12" y1="20" x2="12" y2="4"></line>
+          <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        <span>Stats</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- MODAL 1: RECORD / EDIT MATCH -->
+  <div id="modal-match" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 class="modal-title" id="match-modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Record PES Match
+        </h3>
+        <button class="close-modal-btn" onclick="app.closeModals()">&times;</button>
+      </div>
+
+      <form id="form-match" onsubmit="app.handleSaveMatch(event)">
+        <input type="hidden" id="match-edit-id" value="">
+
+        <!-- Match Picker Row -->
+        <div class="match-picker-row">
+          <!-- Player 1 Side -->
+          <div class="match-side-input">
+            <label class="form-label">Player 1</label>
+            <select id="match-player1" class="form-select" required>
+              <option value="">Select Player</option>
+            </select>
+            <div class="score-stepper">
+              <button type="button" class="step-btn" onclick="app.adjustScore('match-score1', -1)">-</button>
+              <input type="number" id="match-score1" class="score-val-input" value="0" min="0" max="99" required>
+              <button type="button" class="step-btn" onclick="app.adjustScore('match-score1', 1)">+</button>
+            </div>
+          </div>
+
+          <div class="match-picker-vs">VS</div>
+
+          <!-- Player 2 Side -->
+          <div class="match-side-input">
+            <label class="form-label">Player 2</label>
+            <select id="match-player2" class="form-select" required>
+              <option value="">Select Player</option>
+            </select>
+            <div class="score-stepper">
+              <button type="button" class="step-btn" onclick="app.adjustScore('match-score2', -1)">-</button>
+              <input type="number" id="match-score2" class="score-val-input" value="0" min="0" max="99" required>
+              <button type="button" class="step-btn" onclick="app.adjustScore('match-score2', 1)">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Permanent Match Number Display (Automatic, no change needed) -->
+        <div class="permanent-match-box">
+          <span class="perm-match-label">Official Match Order</span>
+          <span class="perm-match-num" id="modal-perm-match-num">Match #1</span>
+        </div>
+
+        <button type="submit" class="btn-primary" id="btn-save-match">Save Match Result</button>
+        <button type="button" class="btn-danger" id="btn-delete-match" style="display: none;" onclick="app.handleDeleteMatchFromModal()">Delete This Match</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: ADD / EDIT PLAYER -->
+  <div id="modal-player" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header">
+        <h3 class="modal-title" id="player-modal-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          Add PES Competitor
+        </h3>
+        <button class="close-modal-btn" onclick="app.closeModals()">&times;</button>
+      </div>
+
+      <form id="form-player" onsubmit="app.handleSavePlayer(event)">
+        <input type="hidden" id="player-edit-id" value="">
+
+        <div class="form-group">
+          <label class="form-label" for="player-name">Player Name *</label>
+          <input type="text" id="player-name" class="form-input" placeholder="e.g. Asad, Alex, Leo" required maxlength="25">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="player-tag">Tag / PES Nickname (Optional)</label>
+          <input type="text" id="player-tag" class="form-input" placeholder="e.g. Counter-Attack Specialist, No.10" maxlength="30">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="player-color">Badge Color Accent</label>
+          <select id="player-color" class="form-select">
+            <option value="#3b82f6">Electric Blue</option>
+            <option value="#00e676">Stadium Green</option>
+            <option value="#00e5ff">Neon Cyan</option>
+            <option value="#ec4899">Hot Pink</option>
+            <option value="#f59e0b">Amber Gold</option>
+            <option value="#8b5cf6">Vibrant Purple</option>
+            <option value="#ef4444">Crimson Red</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="player-status">Player Competition Status</label>
+          <select id="player-status" class="form-select">
+            <option value="active">Active (Available for matches)</option>
+            <option value="disabled">Disabled / Inactive (Paused from matches)</option>
+          </select>
+        </div>
+
+        <button type="submit" class="btn-primary" id="btn-save-player">Save Player</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 4: COOL ALERT & CONFIRMATION POPUP -->
+  <div id="modal-cool-alert" class="modal-overlay" style="align-items: center;">
+    <div class="cool-alert-sheet theme-danger" id="cool-alert-sheet">
+      <div class="cool-alert-icon-ring" id="cool-alert-icon-box">
+        <svg id="cool-alert-icon-svg" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+          <line x1="12" y1="9" x2="12" y2="13"></line>
+          <line x1="12" y1="17" x2="12.01" y2="17"></line>
+        </svg>
+      </div>
+      <h3 class="cool-alert-title" id="cool-alert-title">Duplicate Player Name!</h3>
+      <p class="cool-alert-body" id="cool-alert-message">
+        A player with this name already exists in MooN PES Competition.
+      </p>
+      
+      <div class="cool-alert-actions" id="cool-alert-actions">
+        <button type="button" class="cool-alert-cancel-btn" id="cool-alert-cancel-btn" style="display: none;" onclick="app.closeCoolAlert(false)">Cancel</button>
+        <button type="button" class="cool-alert-btn" id="cool-alert-confirm-btn" onclick="app.handleCoolAlertConfirm()">Got It</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast-message" class="toast-msg">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <polyline points="20 6 9 17 4 12"></polyline>
+    </svg>
+    <span id="toast-text">Update saved</span>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
